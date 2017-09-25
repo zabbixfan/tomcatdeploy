@@ -1,0 +1,28 @@
+---
+- shell: date +%T
+  register: res
+- debug: msg={{res.stdout}}
+
+- name: copy file to work directory
+  copy: src=getdate.py dest=/tmp
+
+- name: stop tomcat by raw script
+  command: /etc/init.d/tomcat-{{ project_name }} stop
+
+- name: recover war file
+  command: python getdate.py /backup/{{project_name}}
+  register: res
+ 
+- name: recover
+  shell: mv -f /backup/{{project_name}}/{{res.stdout}}/*.war {{ tomcat_path }}/apache-tomcat-8.0.37/webapps/ removes=/backup/{{project_name}}/{{res.stdout}}/*.war
+  register: res2
+- debug: msg={{res2}}
+
+- name: start Tomcat by raw script
+  command: /etc/init.d/tomcat-{{ project_name }} start
+- name: wait for tomcat to start
+  wait_for: port={{http_port}}
+
+- shell: date +%T
+  register: res
+- debug: msg={{res.stdout}}

@@ -1,0 +1,26 @@
+---
+# This playbook deploys a simple standalone Tomcat 7 server.
+
+- hosts: all 
+  remote_user: root
+  gather_facts: false
+  become: yes
+  become_method: sudo
+  tasks:
+    #- command: wget "http://app.apitops.com/Package%2Fb200d844-4712-4477-8ff8-d39bce163ad2?OSSAccessKeyId=LTAIEt8BLTWjDr9t&response-content-disposition=attachment%3Bfilename%3Dtopsales-web.war&Expires=1488526416&Signature=B6fVHudrHu4ie9ze8%2BVcr4v9wpc%3D" -O /tmp/topsales.war
+    #- name: Install Java 1.8
+    #  yum: name={{item}} state=present
+    #  with_items:
+    #    - java-1.8.0-openjdk
+    #    - java-1.8.0-openjdk-devel
+  #  - debug: msg={{xmx}}
+    - name: change zabbix profile
+      lineinfile:
+          dest: /etc/profile
+          regexp: "{{item.reg}}"
+          line: "{{item.line}}"
+          state: absent
+      with_items:
+          - {reg: '^export JAVA_HOME=',line: "# export JAVA_HOME=/usr/local/jdk1.8.0_91"} 
+          - {reg: '^export PATH=',line: "# export PATH=$JAVA_HOME/bin:$PATH"}
+          - {reg: '^export CLASSPATH=',line: "# export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar"}
